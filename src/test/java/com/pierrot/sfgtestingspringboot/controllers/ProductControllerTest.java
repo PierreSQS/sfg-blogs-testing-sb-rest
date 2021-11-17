@@ -1,5 +1,6 @@
 package com.pierrot.sfgtestingspringboot.controllers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pierrot.sfgtestingspringboot.model.Product;
 import com.pierrot.sfgtestingspringboot.services.ProductService;
 import org.junit.jupiter.api.BeforeEach;
@@ -23,13 +24,16 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(ProductController.class)
-class ProductControllerTest extends AbstractTest {
+class ProductControllerTest {
 
     Product productMock1;
     Product productMock2;
 
     @MockBean
     ProductService productServMock;
+
+    @Autowired
+    ObjectMapper objectMapper;
 
     @Autowired
     MockMvc mockMvc;
@@ -47,11 +51,11 @@ class ProductControllerTest extends AbstractTest {
 
         // Then
         mockMvc.perform(post("/api/v1/product")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(writeAsJsonValue(productMock1)))
-             .andExpect(status().isCreated())
-             .andExpect(jsonPath("$.name",is(equalTo(productMock1.getName()))))
-             .andDo(print());
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(productMock1)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.name",is(equalTo(productMock1.getName()))))
+                .andDo(print());
     }
 
     @Test
