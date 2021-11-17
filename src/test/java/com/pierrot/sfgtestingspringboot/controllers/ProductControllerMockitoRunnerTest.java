@@ -5,11 +5,14 @@ import com.pierrot.sfgtestingspringboot.model.Product;
 import com.pierrot.sfgtestingspringboot.services.ProductService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.List;
 
@@ -23,25 +26,29 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(ProductController.class)
+@ExtendWith(MockitoExtension.class)
 class ProductControllerMockitoRunnerTest {
 
     Product productMock1;
     Product productMock2;
 
-    @MockBean
+    @Mock
     ProductService productServMock;
 
-    @Autowired
     ObjectMapper objectMapper;
 
     @Autowired
     MockMvc mockMvc;
 
+    @InjectMocks
+    ProductController productController;
+
     @BeforeEach
     void setUp() {
         productMock1= new Product(1,"Samsung Galaxy", 625.50f);
         productMock2 = new Product(2,"Desktop PC", 2099.99f);
+        objectMapper = new ObjectMapper();
+        mockMvc = MockMvcBuilders.standaloneSetup(productController).build();
     }
 
     @Test
@@ -51,11 +58,11 @@ class ProductControllerMockitoRunnerTest {
 
         // Then
         mockMvc.perform(post("/api/v1/product")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(productMock1)))
-             .andExpect(status().isCreated())
-             .andExpect(jsonPath("$.name",is(equalTo(productMock1.getName()))))
-             .andDo(print());
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(productMock1)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.name",is(equalTo(productMock1.getName()))))
+                .andDo(print());
     }
 
     @Test
